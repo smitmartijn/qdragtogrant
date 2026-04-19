@@ -1,0 +1,56 @@
+# Build artifacts
+build/
+build-*/
+out/
+cmake-build-*/
+
+# CMake (in case anyone configures in-source)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeUserPresets.json
+CTestTestfile.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Compiled objects, libs, executables
+*.o
+*.obj
+*.a
+*.dylib
+*.so
+*.app/
+
+# Qt
+*.user
+*.user.*
+*.autosave
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmake.stash
+*.qmake.cache
+
+# IDEs
+.vscode/
+.idea/
+*.xcodeproj/
+*.xcworkspace/
+.cache/
+compile_commands.json
+.clangd/
+.clang-format
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Logs / scratch
+*.log
+*.tmp
+*.swp
