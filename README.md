@@ -9,7 +9,7 @@ Qt 6 / C++ library for macOS that helps users grant Privacy & Security permissio
 Requires Qt 6, CMake 3.20+, macOS 14+, Xcode command line tools.
 
 ```sh
-cmake -S . -B build -DCMAKE_PREFIX_PATH=$HOME/Qt/6.9.3/macos
+cmake -S . -B build -DCMAKE_PREFIX_PATH=$HOME/Qt/6.11.1/macos
 cmake --build build
 open build/QDragToGrantSample.app
 ```
