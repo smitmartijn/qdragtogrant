@@ -120,22 +120,33 @@ bool canPollLive(Panel panel) {
 bool isActuallyGranted(Panel panel) {
     switch (panel) {
         case Panel::Accessibility: {
-            // Pick a long-lived foreign process to query. Finder is always
-            // running; if for some reason it isn't, fall back to launchd.
-            pid_t targetPid = 0;
+            // Pick a long-lived foreign process to query. Deliberately no
+            // launchd fallback: launchd runs no accessibility server, so
+            // probing it always fails and would report "not granted" forever.
             NSArray<NSRunningApplication*>* finders =
                 [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.finder"];
-            if (finders.count > 0) {
-                targetPid = finders.firstObject.processIdentifier;
-            } else {
-                targetPid = 1; // launchd
+            if (finders.count == 0) {
+                NSLog(@"[QDragToGrant] AX cross-process check: Finder not running");
+                return false;
             }
+            pid_t targetPid = finders.firstObject.processIdentifier;
+
             AXUIElementRef elem = AXUIElementCreateApplication(targetPid);
             if (!elem) return false;
+
+            // Callers poll this on the main thread, so bound how long an
+            // unresponsive target can stall the UI.
+            AXUIElementSetMessagingTimeout(elem, 2.0f);
+
             CFTypeRef value = NULL;
-            // kAXChildrenAttribute on a foreign app strictly requires
-            // accessibility — there is no lenient fallback path.
-            AXError err = AXUIElementCopyAttributeValue(elem, kAXChildrenAttribute, &value);
+            // kAXRoleAttribute is served by the accessibility runtime and needs
+            // no work from the target, so a busy or blocked Finder cannot fail
+            // it. It still requires accessibility: an untrusted process gets
+            // kAXErrorAPIDisabled. Attributes that make the target do real work
+            // (kAXChildrenAttribute enumerates its windows) time out with
+            // kAXErrorCannotComplete when it is stuck on e.g. an unreachable
+            // network mount, which is indistinguishable from a denial here.
+            AXError err = AXUIElementCopyAttributeValue(elem, kAXRoleAttribute, &value);
             if (value) CFRelease(value);
             CFRelease(elem);
             NSLog(@"[QDragToGrant] AX cross-process check: pid=%d err=%d", targetPid, (int)err);
