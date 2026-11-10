@@ -1,10 +1,19 @@
 #include "qdragtogrant/QDragToGrant.h"
 
+#include <QOperatingSystemVersion>
+
 namespace QDragToGrant {
 
     QString panelTitle(Panel panel) {
         switch (panel) {
-            case Panel::Accessibility: return QStringLiteral("Accessibility");
+            case Panel::Accessibility:
+                // macOS 27 shows this list as "Device Control and Data Access";
+                // the deeplink anchor below is still Privacy_Accessibility.
+                if (QOperatingSystemVersion::current() >=
+                    QOperatingSystemVersion(QOperatingSystemVersion::MacOS, 27)) {
+                    return QStringLiteral("Device Control and Data Access");
+                }
+                return QStringLiteral("Accessibility");
             case Panel::ScreenRecording: return QStringLiteral("Screen Recording");
         }
         return {};
